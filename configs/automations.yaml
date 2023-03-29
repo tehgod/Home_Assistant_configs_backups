@@ -1,0 +1,500 @@
+- id: '1629568809973'
+  alias: Auto Poweroff Coffee Machine
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.coffee_machine
+    to: 'on'
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 11
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 986d804d915ddb352a8df606786fe2ee
+    entity_id: switch.coffee_machine
+    domain: switch
+  mode: single
+- id: '1629580149951'
+  alias: Turn on outside lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: light.outside_lights
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: light.outside_lights
+    data:
+      color_name: darkviolet
+  mode: single
+- id: '1632881155291'
+  alias: Turn off outside lights
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '30'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: above_horizon
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.outside_lights
+  mode: single
+- id: '1632970030417'
+  alias: Turn off outside lights 2
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: -00:30
+  condition: []
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: light.outside_lights
+  mode: single
+- id: '1643044724426'
+  alias: Low dog water bowl alert
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dog_s_water_bowl2
+    to: 'off'
+    from: 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    enabled: false
+  - type: not_occupied
+    platform: device
+    device_id: 58a82f79551767b91832a24a9543f7b3
+    entity_id: binary_sensor.dog_s_water_bowl2
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - repeat:
+      until:
+      - type: is_occupied
+        condition: device
+        device_id: 58a82f79551767b91832a24a9543f7b3
+        entity_id: binary_sensor.dog_s_water_bowl2
+        domain: binary_sensor
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+      sequence:
+      - service: tts.google_translate_say
+        data:
+          message: Please fill the dog's water bowl.
+          entity_id: media_player.all_speakers
+        enabled: false
+      - if:
+        - condition: time
+          before: '21:00:00'
+          after: 09:00:00
+        then:
+        - service: tts.google_translate_say
+          data:
+            entity_id: media_player.all_speakers
+            message: Please refill the dog's water bowl.
+      - service: notify.mobile_app_pixel_6a
+        data: {}
+      - service: notify.mobile_app_pixel_5a
+        data: {}
+      - delay:
+          hours: 6
+          minutes: 0
+          seconds: 0
+          milliseconds: 0
+  mode: single
+- id: '1649457769296'
+  alias: Poweroff Closet Lights (downstairs)
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: 51e724c8abf0e5bfd039b3bd97415740
+    entity_id: light.downstairs_closet
+    domain: light
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 51e724c8abf0e5bfd039b3bd97415740
+    entity_id: light.downstairs_closet
+    domain: light
+  mode: single
+- id: '1649457817459'
+  alias: Poweroff Closet Lights (upstairs)
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: 9185e258660cd7f60cc7137e508effbe
+    entity_id: light.ferret_room_closet
+    domain: light
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 9185e258660cd7f60cc7137e508effbe
+    entity_id: light.ferret_room_closet
+    domain: light
+  mode: single
+- id: '1651352750287'
+  alias: Front door left open alert
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door_contact_2
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: lock.front_door
+      attribute: door_open
+      state: 'true'
+    - type: is_open
+      condition: device
+      device_id: de2d651afafe61f5b23fd9d8048b7f8b
+      entity_id: binary_sensor.front_door_contact_2
+      domain: binary_sensor
+  action:
+  - service: notify.mobile_app_note8
+    data:
+      message: Front door has been left open!
+  - service: notify.mobile_app_pixel_5a
+    data:
+      message: Front door has been left open!
+  - service: media_player.volume_set
+    data:
+      volume_level: 1
+    target:
+      device_id:
+      - 056becb46209538e756671a0c36676bd
+      - b32288f91c010ae068ddca4c290cd260
+      - 9b0d2684edee37f95e9625e9a5c849a3
+  - repeat:
+      count: 2
+      sequence:
+      - service: tts.google_translate_say
+        data:
+          entity_id: media_player.all_speakers
+          message: Front door has been left open.
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 15
+          milliseconds: 0
+  mode: single
+- id: '1651443594463'
+  alias: Back door left open alert
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.back_door_contact
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+  - platform: state
+    entity_id: binary_sensor.back_screen_door_contact
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+  condition:
+  - condition: state
+    entity_id: binary_sensor.back_screen_door_contact
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.back_door_contact
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+    state: 'on'
+  action:
+  - service: notify.mobile_app_note8
+    data:
+      message: Back door has been left open!
+  - service: notify.mobile_app_pixel_5a
+    data:
+      message: Back door has been left open!
+  - service: media_player.volume_set
+    data:
+      volume_level: 1
+    target:
+      device_id:
+      - 056becb46209538e756671a0c36676bd
+      - b32288f91c010ae068ddca4c290cd260
+      - 9b0d2684edee37f95e9625e9a5c849a3
+  - repeat:
+      count: 2
+      sequence:
+      - service: tts.google_translate_say
+        data:
+          entity_id: media_player.all_speakers
+          message: Back door has been left open.
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 15
+          milliseconds: 0
+  mode: single
+- id: '1653357820592'
+  alias: Cycle Bedroom Lights
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: 5cfc171b968453157103b21538dab088
+    type: action
+    subtype: single
+    discovery_id: 0x00124b0024fc4ea2 action_single
+    id: '1'
+  - platform: device
+    domain: mqtt
+    device_id: 5cfc171b968453157103b21538dab088
+    type: action
+    subtype: long
+    discovery_id: 0x00124b0024fc4ea2 action_long
+    id: '2'
+  - platform: device
+    domain: mqtt
+    device_id: 5cfc171b968453157103b21538dab088
+    type: action
+    subtype: double
+    discovery_id: 0x00124b0024fc4ea2 action_double
+    id: '3'
+  - platform: device
+    domain: mqtt
+    device_id: d669d053f25a348b3384bd190d9b3266
+    type: click
+    subtype: 'off'
+    discovery_id: 0x84fd27fffe958abe click_off
+    id: '2'
+  - platform: device
+    domain: mqtt
+    device_id: d669d053f25a348b3384bd190d9b3266
+    type: click
+    subtype: 'on'
+    discovery_id: 0x84fd27fffe958abe click_on
+    id: '3'
+  - platform: device
+    domain: mqtt
+    device_id: d669d053f25a348b3384bd190d9b3266
+    type: action
+    subtype: brightness_move_up
+    discovery_id: 0x84fd27fffe958abe action_brightness_move_up
+    id: '4'
+  - platform: device
+    domain: mqtt
+    device_id: d669d053f25a348b3384bd190d9b3266
+    type: action
+    subtype: brightness_move_down
+    discovery_id: 0x84fd27fffe958abe action_brightness_move_down
+    id: '5'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: '2'
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: '1'
+          - condition: device
+            type: is_on
+            device_id: e24a7265a39412810227bc67dc2a4e4b
+            entity_id: light.pink_shade_2
+            domain: light
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.bedroom_lights
+    - conditions:
+      - condition: trigger
+        id: '3'
+      sequence:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id: light.bedroom_lights
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: '4'
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: '1'
+          - condition: device
+            type: is_off
+            device_id: e24a7265a39412810227bc67dc2a4e4b
+            entity_id: light.pink_shade_2
+            domain: light
+      sequence:
+      - service: script.cycle_bedroom_lights
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: '5'
+      sequence:
+      - service: script.cycle_bedroom_lights_down
+        data: {}
+    alias: Choose Action
+  mode: single
+- id: '1653360494914'
+  alias: Cycle Living Room Lights
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: 06fc818b60172111c9d597aa90687c10
+    type: action
+    subtype: single
+    discovery_id: 0x00124b0024fc526b action_single
+    id: '1'
+  - platform: device
+    domain: mqtt
+    device_id: 06fc818b60172111c9d597aa90687c10
+    type: action
+    subtype: double
+    discovery_id: 0x00124b0024fc526b action_double
+    id: '2'
+  - platform: device
+    domain: mqtt
+    device_id: 06fc818b60172111c9d597aa90687c10
+    type: action
+    subtype: long
+    discovery_id: 0x00124b0024fc526b action_long
+    id: '3'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: '1'
+        - condition: trigger
+          id: '2'
+      sequence:
+      - type: turn_on
+        device_id: c75ac1e07a085cfa73298c5c97407d36
+        entity_id: light.living_room_lamp_1
+        domain: light
+      - type: turn_on
+        device_id: 2f4ea22be84509d95422e4d65a6ff677
+        entity_id: light.living_room_lamp_2
+        domain: light
+      - type: turn_on
+        device_id: a8fc437ca6b64ecc9793d3d0597ed1a2
+        entity_id: light.monitors
+        domain: light
+      - type: turn_on
+        device_id: f796cc5e0d5ac2fb4f3b42f86cb34545
+        entity_id: light.downstairs_bathroom
+        domain: light
+      - type: turn_on
+        device_id: 51e724c8abf0e5bfd039b3bd97415740
+        entity_id: light.downstairs_closet
+        domain: light
+    default:
+    - type: turn_off
+      device_id: c75ac1e07a085cfa73298c5c97407d36
+      entity_id: light.living_room_lamp_1
+      domain: light
+    - type: turn_off
+      device_id: 2f4ea22be84509d95422e4d65a6ff677
+      entity_id: light.living_room_lamp_2
+      domain: light
+    - type: turn_off
+      device_id: a8fc437ca6b64ecc9793d3d0597ed1a2
+      entity_id: light.monitors
+      domain: light
+    - type: turn_off
+      device_id: 51e724c8abf0e5bfd039b3bd97415740
+      entity_id: light.downstairs_closet
+      domain: light
+    - type: turn_off
+      device_id: f796cc5e0d5ac2fb4f3b42f86cb34545
+      entity_id: light.downstairs_bathroom
+      domain: light
+  mode: single
+- id: '1676143774482'
+  alias: Downstairs Closet Light
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: 819a4f57e9cb7a9422d9c936e268ec64
+    entity_id: binary_sensor.movement_sensor_occupancy
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 51e724c8abf0e5bfd039b3bd97415740
+    entity_id: light.downstairs_closet
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 51e724c8abf0e5bfd039b3bd97415740
+    entity_id: light.downstairs_closet
+    domain: light
+  mode: single

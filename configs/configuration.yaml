@@ -1,0 +1,42 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+http:
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+nest:
+  client_id: !secret nest_client_id
+  client_secret: !secret nest_client_secret
+  project_id: !secret nest_project_id
+  subscriber_id: !secret nest_subscriber_id
+
+media_player:
+  # Use the Python ADB implementation
+  - platform: androidtv
+    name: NVidia Shield
+    host: !secret shield_ip_address
+
+google_assistant: !include g_assistant_integration.yaml
+
+camera:
+  - platform: generic
+    stream_source: !secret car_stream_source
+    name: "Car Cam"
+
+  - platform: generic
+    stream_source: !secret front_door_stream_source
+    name: "Front Yard Cam"
+
+  - platform: generic
+    stream_source: !secret backyard_stream_source
+    name: "Back Yard Cam"
